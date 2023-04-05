@@ -11,4 +11,3 @@ mongoose
   });
 
 module.exports = mongoose;
-// mongodb+srv://BK-DB:BHAVESH@db.nkhilj1.mongodb.net/?retryWrites=true&w=majority

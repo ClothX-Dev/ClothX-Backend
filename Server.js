@@ -1,11 +1,15 @@
 const express = require("express");
 const app = express();
-const DB = require('./db/db');
-
-const PORT = 3000;
-
+// DB
+const DB = require("./db/db");
+// port
+const PORT = 8080;
+require("./model/userModel");
+app.use(require("./routes/userRoutes"));
+app.use(express.json());
+// Test Route
 app.get("/", function (req, res) {
-  res.send("Hello World");
+  res.send("Hello Bhavesh");
 });
 
 // app.listen(3000)
