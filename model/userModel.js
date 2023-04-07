@@ -3,13 +3,7 @@ const validator = require("validator");
 const db = require("../db/db");
 const UserSchema = new mongoose.Schema(
   {
-    firstname: {
-      type: String,
-      required: false,
-      minlength: 5,
-      maxlength: 20,
-    },
-    lastname: {
+    name: {
       type: String,
       required: false,
       minlength: 5,
@@ -22,7 +16,6 @@ const UserSchema = new mongoose.Schema(
       required: false,
       unique: true,
     },
-
     email: {
       type: String,
       required: false,
@@ -38,22 +31,22 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // state: {
-    //   required: false,
-    //   type: String,
-    // },
-    // city: {
-    //   type: String,
-    //   required: false,
-    // },
-    // address: {
-    //   type: String,
-    //   required: false,
-    // },
-    // landmark: {
-    //   type: String,
-    //   required: false,
-    // },
+    state: {
+      required: false,
+      type: String,
+    },
+    city: {
+      type: String,
+      required: false,
+    },
+    address: {
+      type: String,
+      required: false,
+    },
+    landmark: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
