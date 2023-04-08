@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const db = require("../db/db");
+const passwordValidator = require("password-validator");
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -32,8 +32,8 @@ const UserSchema = new mongoose.Schema(
       required: true,
     },
     state: {
-      required: false,
       type: String,
+      required: false,
     },
     city: {
       type: String,
@@ -47,6 +47,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    pincode: {
+      type: Number,
+      required: false,
+    },
   },
   {
     timestamps: true,
@@ -54,7 +58,4 @@ const UserSchema = new mongoose.Schema(
 );
 
 // Model
-// const User = db.model("User", UserSchema);
-// module.export = User;
-
 module.exports = mongoose.model("User", UserSchema);

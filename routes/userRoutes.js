@@ -92,4 +92,34 @@ router.post("/user/login", (req, res) => {
     });
 });
 
+// Edit profile API
+router.patch("/user/edit/:id", (req, res, next) => {
+  // console.log(req.params.id);
+  User.findOneAndUpdate(
+    { id: req.params._id },
+    {
+      $set: {
+        name: req.body.name,
+        phone: req.body.phone,
+        email: req.body.email,
+        state: req.body.state,
+        city: req.body.city,
+        address: req.body.address,
+        landmark: req.body.landmark,
+        pincode: req.body.pincode,
+      },
+    }
+  )
+    .then((result) => {
+      res.status(200).json({
+        message: result,
+      });
+    })
+    .catch((err) => {
+      // console.log(err);
+      res.status(500).json({
+        Error: err,
+      });
+    });
+});
 module.exports = router;
