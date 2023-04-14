@@ -1,15 +1,19 @@
 const express = require("express");
 const app = express();
+require("dotenv/config");
 // DB
 const DB = require("./db/db");
 // port
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
+// User Model
 require("./model/userModel");
+// Otp Verication Model
+require("./model/UserOtpVerification");
 app.use(require("./routes/userRoutes"));
 app.use(express.json());
 // Test Route
 app.get("/", function (req, res) {
-  res.send("Hello Bhavesh");
+  res.send("Hello World");
 });
 
 // app.listen(3000)

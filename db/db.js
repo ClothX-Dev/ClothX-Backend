@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const dbUrl =
-  "mongodb+srv://clothxdevelopers:admin@clothx-backend.iorv36f.mongodb.net/?retryWrites=true&w=majority";
+const dbUrl = process.env.MONGODB_URL_LOCAL;
 mongoose
   .connect(dbUrl)
   .then(() => {

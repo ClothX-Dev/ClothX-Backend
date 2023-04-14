@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const passwordValidator = require("password-validator");
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -30,6 +29,12 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      minlength: 8,
+      trim: true,
+      // lowercase: true,
+      // uppercase: true,
+      // maxlength: 30,
+      alphanumerics: true,
     },
     state: {
       type: String,
@@ -50,6 +55,13 @@ const UserSchema = new mongoose.Schema(
     pincode: {
       type: Number,
       required: false,
+    },
+    // token: {
+    //   required: false,
+    //   type: String,
+    // },
+    verified: {
+      type: Boolean,
     },
   },
   {
