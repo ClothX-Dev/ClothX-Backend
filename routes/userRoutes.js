@@ -47,22 +47,10 @@ router.post("/user/register", (req, res) => {
           const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-              user: 'clothxdevelopers@gmail.com',
-              pass: 'dvctunpmtjwpzyng'
+              user: "clothxdevelopers@gmail.com",
+              // pass: "dvctunpmtjwpzyng",
             },
           });
-          // const transporter = nodemailer.createTransport({
-          //   host: "smtp.mail.yahoo.com",
-          //   port: 465,
-          //   secure: true,
-          //   auth: {
-          //     user: "clothdevelopers@​aol.com",
-          //     pass: "DEVELOPERS2024@a",
-          //   },
-          //   // tls: {
-          //   //   ciphers: "SSLv3",
-          //   // },
-          // });
 
           const mailOptions = {
             from: "clothdevelopers@​aol.com",
@@ -83,7 +71,6 @@ router.post("/user/register", (req, res) => {
                   console.log("Email sent: " + info.response);
 
                   // Save the OTP and user details in a database or session
-                  // req.session = { name, email, otp };
                   res.status(200).send("OTP sent successfully");
                 }
               });
@@ -173,51 +160,6 @@ router.patch("/user/edit/:id", (req, res, next) => {
 });
 
 // Send Email Verification
-// const sendVerificationEmail = async ({ id, email }, res) => {
-//   try {
-//     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
-//     // Mail Options
-//     const mailOptions = {
-//       from: "bhaveshgarg2004@gmail.com",
-//       to: email,
-//       subject: "Email Verification",
-//       html: `<p>Enter <b>${otp} </b>in the App to verify your email address  and complete the Authentication.</p> <br>
-//      <p>This code will <b>Expires</b> in 5 Minutes.</p> `,
-//     };
-//     // Hash OTP
-//     // const saltRound = 12;
-//     const hashedOTP = await bcrypt.hash(otp, 12);
-//     const newOTPVerification = new UserOTPVerification({
-//       userId: _id,
-//       otp: hashedOTP,
-//       email: email,
-//       createdAt: new Date(),
-//       // expiresAt: new Date() + 360,
-//     });
-//     // Save OTP Record
-//     newOTPVerification.save();
-//     // transporter.sendMail(mailOptions).
-//     transporter.sendMail(mailOptions, function (error, info) {
-//       if (error) {
-//         return console.log(error);
-//       }
-//       console.log("Message sent: " + info.response);
-//     });
-//     // res.json({
-//     //   Status: "Pending",
-//     //   Message: "Verification Email sent successfully",
-//     //   data: {
-//     //     userID: _id,
-//     //     email,
-//     //   },
-//     // });
-//   } catch (error) {
-//     res.json({
-//       Status: "Failed",
-//       Message: error,
-//     });
-//   }
-// };
 
 // Password reset Api
 
