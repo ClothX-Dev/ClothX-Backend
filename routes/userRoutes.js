@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../model/userModel");
+const OTP = require("../model/UserOtpVerification");
 // const db = require("../db/db");
 const bcrypt = require("bcrypt");
 const secret = require("../secret.json");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
+const SendEmail = require("../utils/mail");
 
 router.use(express.json());
 
@@ -39,51 +41,158 @@ router.post("/user/register", (req, res) => {
             verified: false,
           });
           const otp = otpGenerator.generate(6, {
+            // otp1: `{Math.floor(1000+ Math.random()*9000)}`,
             digits: true,
             alphabets: false,
             upperCase: false,
             specialChars: false,
           });
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-              user: "clothxdevelopers@gmail.com",
-              // pass: "dvctunpmtjwpzyng",
-            },
-          });
 
-          const mailOptions = {
-            from: "clothdevelopers@​aol.com",
-            to: req.body.email,
-            subject: "Verify your email address",
-            text: `<p>Enter <b>${otp} </b>in the App to verify your email address  and complete the Authentication.</p> <br>
-            <p>This code will <b>Expires</b> in 5 Minutes.</p> `,
-          };
+          // const transporter = nodemailer.createTransport({
+          //   service: "gmail",
+          //   auth: {
+          //     user: "clothxdevelopers@gmail.com",
+          //     pass: "dvctunpmtjwpzyng",
+          //   },
+          // });
+
+          // const mailOptions = {
+          //   from: "clothdevelopers@​aol.com",
+          //   to: req.body.email,
+          //   subject: "Verify your email address",
+          //   html: `<p>Thank you for choosing Dresset. <br>
+          //   Use this OTP to complete your Sign Up procedure and verify your account on Dresset.<br>
+          //   <br>
+          //   Remember, Never share this OTP with anyone. <br>
+          //   <b><i>${otp}</i><b>
+          //   <br>
+          //   <br>
+          //   Regards,
+          //   <br>
+          //   Team Dresset</p> `,
+          // };
+
+          // otpVerification.save();
+
           user
             .save()
             .then((result) => {
               // sendVerificationEmail(result, res);
-              transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                  console.log(error);
-                  res.status(500).send("Failed to send OTP");
-                } else {
-                  console.log("Email sent: " + info.response);
+              // transporter.sendMail(mailOptions, (error, info) => {
+              //   if (error) {
+              //     console.log(error);
+              //   } else {
+              //     console.log("Email sent: " + info.response);
+              //   }
+              // });
 
-                  // Save the OTP and user details in a database or session
-                  res.status(200).send("OTP sent successfully");
-                }
-              });
-              res.status(201).json({ message: "User Created" });
+              sendOTP(result, res);
+              // res.status(201).json({ message: "User Created" });
             })
             .catch((err) => {
               res.status(500).json({ error: err });
             });
+
+          // const hashedOTP = bcrypt.hash(otp, 12);
+          // const otpVerification = new OTP({
+          //   userId: req.params,
+          //   otp: hashedOTP,
+          //   createdAt: Date.now(),
+          //   expiresAt: Date.now() + 36000,
+          // });
+
+          // otpVerification
+          //   .save()
+          //   .then((response) => {
+          //     res.status(201).json({ message: "OTP Created" });
+          //   })
+          //   .catch((err) => {
+          //     res.status(500).json({ message: "Error" });
+          //   });
         }
       });
     }
   });
 });
+
+const sendOTP = async ({ _id, email }, res) => {
+  try {
+    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+    const mailOptions = {
+      from: "clothdevelopers@​aol.com",
+      to: email,
+      subject: "Verify your email address",
+      html: `<p>Thank you for choosing Dresset. <br>
+      Use this OTP to complete your Sign Up procedure and verify your account on Dresset.<br>
+      <br>
+      Remember, Never share this OTP with anyone. <br>
+      <b><i>${otp}</i><b>
+      <br>
+      <br>
+      Regards,
+      <br>
+      Team Dresset</p> `,
+    };
+    const hashedOTP = await bcrypt.hash(otp, 12);
+    const newOTP = new OTP({
+      userId: _id,
+      otp: hashedOTP,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 3600000,
+    });
+    // otp save
+    await newOTP.save();
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "clothxdevelopers@gmail.com",
+        pass: "dvctunpmtjwpzyng",
+      },
+    });
+    // transporter.sendMail(mailOptions);
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+    res.json({
+      status: "PENDING",
+      message: "Verification OTP email sent",
+      data: {
+        userId: _id,
+        email,
+      },
+    });
+  } catch (err) {
+    res.json({
+      status: "PENDING",
+      message: err.message,
+    });
+  }
+};
+
+//Verify Token
+// router.get("/verify/:id/:token", async (req, res) => {
+//   try {
+//     const user = await User.findOne({ _id: req.params.id });
+//     if (!user) return res.status(400).send("Invalid link");
+
+//     const token = await Token.findOne({
+//       userId: user._id,
+//       token: req.params.token,
+//     });
+//     if (!token) return res.status(400).send("Invalid link");
+
+//     await User.updateOne({ _id: user._id, verified: true });
+//     await Token.findByIdAndRemove(token._id);
+
+//     res.send("email verified sucessfully");
+//   } catch (error) {
+//     res.status(400).send("An error occured");
+//   }
+// });
 
 // Login API
 router.post("/user/login", (req, res) => {
@@ -130,7 +239,6 @@ router.post("/user/login", (req, res) => {
 
 // Edit profile API
 router.patch("/user/edit/:id", (req, res, next) => {
-  // console.log(req.params.id);
   User.findOneAndUpdate(
     { id: req.params._id },
     {
@@ -158,8 +266,47 @@ router.patch("/user/edit/:id", (req, res, next) => {
       });
     });
 });
-
-// Send Email Verification
+// Verify OTP
+router.post("/user/verfiyOTP", async (req, res) => {
+  try {
+    let { userID, otp } = req.body;
+    if (!userID || !otp) {
+      throw Error("Empty OTP Details are not allowed");
+    } else {
+      const OTPVerification = await otp.find({ userID });
+      if (OTPVerification.length <= 0) {
+        throw new Error("Account doesn't Exists,Please SignUp or Log in.");
+      } else {
+        const { expiresAt } = OTPVerification[0];
+        const hashedOTP = OTPVerification[0].otp;
+        if (expiresAt < Date.now()) {
+          // user otp expired
+          await OTPVerification.deleteMany({ userID });
+          throw new Error("OTP has expired,Please request again!");
+        } else {
+          const validOTP = await bcrypt.compare(otp, hashedOTP);
+          if (!validOTP) {
+            // otp is wrong
+            throw new Error("Invalid OTP, Please try again..");
+          } else {
+            // Sucess
+            await User.updateOne({ _id: userID }, { verified: true });
+            await OTPVerification.deleteMany(userID);
+            res.json({
+              Status: "success",
+              message: "OTP Verification Successful",
+            });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    res.json({
+      Status: "Failed",
+      Message: error.message,
+    });
+  }
+});
 
 // Password reset Api
 

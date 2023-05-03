@@ -4,8 +4,8 @@ const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: false,
-      minlength: 5,
+      required: true,
+      minlength: 4,
       maxlength: 20,
     },
     phone: {
@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: false,
+      required: true,
       unique: [true, "Email already exists"],
       validate(value) {
         if (!validator.isEmail(value)) {
@@ -62,6 +62,7 @@ const UserSchema = new mongoose.Schema(
     // },
     verified: {
       type: Boolean,
+      default: false,
     },
   },
   {
