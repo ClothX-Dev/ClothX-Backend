@@ -8,7 +8,6 @@ const secret = require("../secret.json");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
-const SendEmail = require("../utils/mail");
 
 router.use(express.json());
 
@@ -40,13 +39,13 @@ router.post("/user/register", (req, res) => {
             password: hash,
             verified: false,
           });
-          const otp = otpGenerator.generate(6, {
-            // otp1: `{Math.floor(1000+ Math.random()*9000)}`,
-            digits: true,
-            alphabets: false,
-            upperCase: false,
-            specialChars: false,
-          });
+          // const otp = otpGenerator.generate(6, {
+          //   // otp1: `{Math.floor(1000+ Math.random()*9000)}`,
+          //   digits: true,
+          //   alphabets: false,
+          //   upperCase: false,
+          //   specialChars: false,
+          // });
 
           // const transporter = nodemailer.createTransport({
           //   service: "gmail",
@@ -172,6 +171,49 @@ const sendOTP = async ({ _id, email }, res) => {
     });
   }
 };
+
+// Verify OTP
+
+router.post("/user/verifyOTP", async (req, res) => {
+  try {
+    let { userId, otp } = req.body;
+    if (!userId || !otp) {
+      throw Error("Empty OTP are not Allowed");
+    } else {
+      const recordOTP = await sendOTP.find({
+        userId,
+      });
+      if (recordOTP.length < 0) {
+        throw new Error("Account doesn't Exists. Please Signup");
+      } else {
+        const { expiresAt } = recordOTP[0];
+        const hashedOTP = recordOTP[0].otp;
+
+        if (expiresAt < Date.now()) {
+          await recordOTP.deleteMany({ userId });
+          throw new Error("Code has expired. Please request again.");
+        } else {
+          const validOTP = await bcrypt.compare(otp, hashedOTP);
+          if (!validOTP) {
+            throw new Error("Invalid OTP");
+          } else {
+            await User.updateOne({ _id: userId }, { verified: true });
+            await recordOTP.deleteMany({ _id: userId });
+            res.json({
+              status: "VERIFIED",
+              message: `User Emal verified Successfully`,
+            });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    res.json({
+      status: "FAILED",
+      message: error.message,
+    });
+  }
+});
 
 //Verify Token
 // router.get("/verify/:id/:token", async (req, res) => {
